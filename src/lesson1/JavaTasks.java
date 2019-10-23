@@ -2,6 +2,10 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.*;
+
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
@@ -34,9 +38,74 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public void sortTimes(String inputName, String outputName) {
-        throw new NotImplementedError();
+
+    public static int timeStrToMinute(String time) {  // Время представленное строкой представляю в виде минут прошедших с 00:00
+        String[] digitParts = time.split(":|\\s");
+        String[] charParts = time.split(" ");
+        int result = 0;
+        if(charParts[1].matches("AM")) {
+            if(digitParts[0].matches("12")) {
+                for (int i = 1; i < digitParts.length - 1; i++) {
+                        int number = Integer.parseInt(digitParts[i]);
+                        result = result * 60 + number;
+                    }
+                }
+                else {
+                        for (int n = 1; n < digitParts.length - 1; n++) {
+                            int number = Integer.parseInt(digitParts[n]);
+                            result = result * 60 + number;
+                        }
+                result = result + Integer.parseInt(digitParts[0]) * 3600;
+            }
+        }
+        else {
+            if (digitParts[0].matches("12")) {
+                for (int j = 1; j < digitParts.length - 1; j++) {
+                    int number = Integer.parseInt(digitParts[j]);
+                    result = result * 60 + number;
+                }
+            result += 43200;
+        }
+            else {
+                for (int j = 0; j < digitParts.length - 1; j++) {
+                    int number = Integer.parseInt(digitParts[j]);
+                    result = result * 60 + number;
+                }
+                result += 43200;
+            }
+        }
+        return result;
     }
+
+
+    static public void sortTimes(String inputName, String outputName) throws IOException {
+        ArrayList<String> inputStrings = new ArrayList<>();
+        FileReader reader = new FileReader(inputName);
+        Scanner scan = new Scanner(reader);
+        while (scan.hasNextLine()) {
+            String buffer = scan.nextLine();
+            if (buffer.matches("((1[0-2]|0?[1-9]):([0-5][0-9]):([0-5][0-9]) ([AaPp][Mm]))")) {
+                inputStrings.add(buffer);
+            } else {
+                throw new NotImplementedError();
+            }
+        }
+            Collections.sort(inputStrings, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    return Integer.compare(timeStrToMinute(o1),timeStrToMinute(o2));
+                }
+            });
+
+            FileWriter writer = new FileWriter(outputName);
+        for (int i = 0; i < inputStrings.size() ; i++) {
+            writer.write(inputStrings.get(i) + System.getProperty("line.separator"));
+        }
+        writer.close();
+    }
+
+  // Сложность алгоритма O(logN*N)
+    // память O(n)
 
     /**
      * Сортировка адресов
@@ -64,8 +133,10 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public void sortAddresses(String inputName, String outputName) {
-        throw new NotImplementedError();
+    static public void sortAddresses(String inputName, String outputName) throws FileNotFoundException {
+/*
+        problema s kirilicey
+*/
     }
 
     /**
@@ -98,9 +169,33 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
-    static public void sortTemperatures(String inputName, String outputName) {
-        throw new NotImplementedError();
+    static public void sortTemperatures(String inputName, String outputName) throws IOException {
+        FileReader reader = new FileReader(inputName);
+        BufferedReader scan = new BufferedReader(reader);
+        ArrayList<Double> inputs = new ArrayList<>();
+        String keeper;
+        while((keeper = scan.readLine()) != null) {
+            double bufferStr = Double.parseDouble(keeper);
+            inputs.add(bufferStr);
+        }
+
+        Collections.sort(inputs, new Comparator<Double>() {
+            @Override
+            public int compare(Double o1, Double o2) {
+                return o1.compareTo(o2);
+            }
+        });
+        File file = new File(outputName);
+        FileWriter fileReader = new FileWriter(file);
+        BufferedWriter writer = new BufferedWriter(fileReader);
+        for (int i = 0; i < inputs.size() ; i++) {
+            writer.write(String.valueOf(inputs.get(i)) + System.getProperty("line.separator"));
+        }
+        writer.close();
     }
+
+    // время O(n*logn)
+    // память O(n)
 
     /**
      * Сортировка последовательности
@@ -131,9 +226,64 @@ public class JavaTasks {
      * 2
      * 2
      */
-    static public void sortSequence(String inputName, String outputName) {
-        throw new NotImplementedError();
+    static public void sortSequence(String inputName, String outputName) throws IOException {
+        FileReader reader = new FileReader(inputName);
+        BufferedReader scan = new BufferedReader(reader);
+        ArrayList<String> inputs = new ArrayList<>();
+        String keeper;
+        while ((keeper = scan.readLine()) != null) {
+            inputs.add(keeper);
+        }
+
+        ArrayList<Integer> inputsSorted = new ArrayList<>();
+        for (int i = 0; i < inputs.size() ; i++) {
+            inputsSorted.add(Integer.parseInt(inputs.get(i)));
+        }
+        inputsSorted.sort(Integer::compareTo);
+
+        HashMap<Integer, Integer> bufferMap = new HashMap<>(); // подсчет количества одинаковых элементов
+        for (int element : inputsSorted) {
+            if (bufferMap.containsKey(element)) {
+                bufferMap.put(element, bufferMap.get(element) + 1);
+            } else {
+                bufferMap.put(element, 1);
+            }
+        }
+        int maxValue = Collections.max(bufferMap.values());
+        int maxKey = 0;
+
+        Iterator it = bufferMap.entrySet().iterator();
+        ArrayList<Integer> pairKeeper = new ArrayList<>();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            if (pair.getValue().equals(maxValue)) {
+                pairKeeper.add((Integer)pair.getKey());
+            }
+        }
+
+        maxKey = Collections.min(pairKeeper);
+
+        ArrayList<String> preResult = new ArrayList<>();
+        for (int i = 0; i < inputs.size() ; i++) {
+            if(Integer.parseInt(inputs.get(i)) != maxKey) {
+                preResult.add(inputs.get(i));
+            }
+        }
+
+        for (int i = 0; i < maxValue ; i++) {
+            preResult.add(String.valueOf(maxKey));
+        }
+        File file = new File(outputName);
+        FileWriter fileReader = new FileWriter(file);
+        BufferedWriter writer = new BufferedWriter(fileReader);
+        for (int i = 0; i < inputs.size() ; i++) {
+            writer.write(preResult.get(i) + System.getProperty("line.separator"));
+        }
+        writer.close();
     }
+
+    // время O(n*logn)
+    // память O(n)
 
     /**
      * Соединить два отсортированных массива в один
@@ -150,6 +300,17 @@ public class JavaTasks {
      * Результат: second = [1 3 4 9 9 13 15 20 23 28]
      */
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
-        throw new NotImplementedError();
+        int li = 0, ri = second.length/2;
+        for (int i = 0; i < second.length; i++) {
+            if (li < first.length && (ri == second.length || first[li].compareTo(second[ri]) < 0)) {
+                second[i] = first[li++];
+            }
+            else {
+                second[i] = second[ri++];
+            }
+        }
     }
+
+    // Временные затраты O(N)
+
 }

@@ -3,7 +3,12 @@ package lesson2;
 import kotlin.NotImplementedError;
 import kotlin.Pair;
 
-import java.util.Set;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.*;
+
+import static java.lang.StrictMath.max;
+
 
 @SuppressWarnings("unused")
 public class JavaAlgorithms {
@@ -31,9 +36,36 @@ public class JavaAlgorithms {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public Pair<Integer, Integer> optimizeBuyAndSell(String inputName) {
-        throw new NotImplementedError();
+    static public Pair<Integer, Integer> optimizeBuyAndSell(String inputName) throws FileNotFoundException {
+        FileReader reader = new FileReader(inputName);
+        Scanner scan = new Scanner(reader);
+        ArrayList<Integer> inputs = new ArrayList<>();
+        while (scan.hasNext()) {
+            inputs.add(Integer.parseInt(scan.nextLine()));
+        }
+        int best = 0;
+        int current = inputs.get(0);
+        int dayBuy = 0;
+        int daySell = 0;
+        int daySellInd = 0;
+        for (int i = 0; i < inputs.size() - 1; i++) {
+            int difference = inputs.get(i+1) - current;
+            if(difference < 0) {
+            current = inputs.get(i+1);
+            continue;
+            }
+            if(best < difference) {
+                best = difference;
+                dayBuy = current;
+                daySell = inputs.get(i+1);
+                daySellInd = i+1;
+            }
+        }
+        Pair pair = new Pair(inputs.indexOf(dayBuy) + 1, daySellInd + 1);
+        return pair;
     }
+    // временные затраты O(n)
+    // ресерсные затраты O(n)
 
     /**
      * Задача Иосифа Флафия.
@@ -99,9 +131,38 @@ public class JavaAlgorithms {
      * Если имеется несколько самых длинных общих подстрок одной длины,
      * вернуть ту из них, которая встречается раньше в строке first.
      */
-    static public String longestCommonSubstring(String firs, String second) {
-        throw new NotImplementedError();
-    }
+    static public String longestCommonSubstring(String first, String second) { throw new NotImplementedError(); }
+       /* String str1 = String.join("", first.split(" "));
+        String[] charArrayFirst = String.join("", str1).split("");
+        String str2 = String.join("", second.split(" "));
+        String[] charArraySecond = String.join("", str2).split("");
+        ArrayList<Character> charList = new ArrayList<>();
+        String bufferSecond = "";
+        String result = "";
+        ArrayList<String> resultList = new ArrayList<>();
+
+
+
+        *//*for (int i = 0; i < charArrayFirst.length; i++) {
+            String bufferFirst = charArrayFirst[i];
+            for (int j = 0; j < charArrayFirst.length; j++) {
+                if(str2.contains(bufferFirst + bufferSecond)) {
+                    bufferSecond = bufferFirst;
+                    bufferSecond += charArrayFirst[j];
+                }
+
+            }
+            resultList.add(bufferFirst);*//*
+
+        Collections.sort(resultList, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return Integer.compare(o1.length(), o2.length());
+            }
+        });
+        return resultList.get(resultList.size() - 1);
+    }*/
+
 
     /**
      * Число простых чисел в интервале
@@ -114,8 +175,28 @@ public class JavaAlgorithms {
      * Единица простым числом не считается.
      */
     static public int calcPrimesNumber(int limit) {
-        throw new NotImplementedError();
+        if(limit < 0) return 0;
+        boolean[] digit = new boolean[limit + 1];
+        int count = 0;
+
+        Arrays.fill(digit, true);
+        digit[0] = false;
+        digit[1] = false;
+        for (int i = 2; i < digit.length; ++i) {
+            if (digit[i]) {
+                for (int j = 2; i * j < digit.length; ++j) {
+                    digit[i * j] = false;
+                }
+            }
+        }
+        for (int i = 0; i < digit.length; i++) {
+            if(digit[i]) count++;
+        }
+        return count;
     }
+
+    // время O(nlog(logn))
+    // память O(n)
 
     /**
      * Балда
