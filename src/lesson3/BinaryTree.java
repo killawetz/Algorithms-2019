@@ -81,7 +81,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         size--;
         return true;
     }
-
+//ыфафафы
     private Node delete(Node<T> root, T val) {
         if (root == null) return root;
         int comparison = val.compareTo(root.value);
