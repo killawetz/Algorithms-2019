@@ -74,8 +74,42 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        if(root == null) return false;
+        T buffer = (T) o;
+        Node<T> closest = find(buffer);
+        root = delete(root, closest.value);
+        size--;
+        return true;
+    }
+
+    private Node delete(Node<T> root, T val) {
+        if (root == null) return root;
+        int comparison = val.compareTo(root.value);
+        if (comparison < 0) root.left = delete(root.left, val);
+        else if (comparison > 0) root.right = delete(root.right, val);
+        else {
+            if (root.left == null)
+                return root.right;
+            else if (root.right == null)
+                return root.left;
+            Node<T> bufNode = new Node<>(minimum(root.right));
+            bufNode.right = root.right;
+            bufNode.left = root.left;
+            root = bufNode;
+            root.right = delete(root.right, root.value);
+        }
+            return root;
+        }
+
+    private T minimum(Node root)
+    {
+        T min = (T) root.value;
+        while (root.left != null)
+        {
+            min = (T) root.left.value;
+            root = root.left;
+        }
+        return min;
     }
 
     @Override
@@ -108,8 +142,14 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
     public class BinaryTreeIterator implements Iterator<T> {
 
-        private BinaryTreeIterator() {
-            // Добавьте сюда инициализацию, если она необходима
+        private Stack<Node<T>> stack = new Stack<>();
+
+        private BinaryTreeIterator(Node<T> root) {
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+                // Добавьте сюда инициализацию, если она необходима
+            }
         }
 
         /**
@@ -118,8 +158,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public boolean hasNext() {
-            // TODO
-            throw new NotImplementedError();
+            return !stack.isEmpty();
         }
 
         /**
@@ -128,8 +167,13 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            // TODO
-            throw new NotImplementedError();
+            Node<T> minimum = stack.pop();
+            Node<T> right = minimum.right;
+            while(right!=null){
+                stack.push(right);
+                right = right.left;
+            }
+            return minimum.value;
         }
 
         /**
@@ -146,7 +190,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public Iterator<T> iterator() {
-        return new BinaryTreeIterator();
+        return new BinaryTreeIterator(root);
     }
 
     @Override
@@ -179,7 +223,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        // TODO
+
         throw new NotImplementedError();
     }
 
@@ -212,5 +256,51 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             current = current.right;
         }
         return current.value;
+    }
+
+    public class CustomSet  extends TreeSet {
+        private T fromElement;
+        private T toElement;
+
+        public CustomSet(T fromElement, T toElement) {
+            this.fromElement = fromElement;
+            this.toElement = toElement;
+        }
+
+
+        @Override
+        public boolean add(Object o) {
+            T value = (T) o;
+            if (fromElement == null) {
+                if (value.compareTo((T) o) > 0) {
+                    throw new IllegalArgumentException();
+                } else {
+                    BinaryTree.this.add(value);
+                    super.add(value);
+                    return true;
+                }
+            }
+            if (toElement == null) {
+                if (value.compareTo((T) o) <= 0) {
+                    throw new IllegalArgumentException();
+                } else {
+                    BinaryTree.this.add(value);
+                    super.add(value);
+                    return true;
+                }
+            }
+            if (value.compareTo(toElement) < 0 && value.compareTo(fromElement) >= 0) {
+                BinaryTree.this.add(value);
+                super.add(value);
+                return true;
+            }
+            return true;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            BinaryTree.this.remove(o);
+            return super.remove(o);
+        }
     }
 }
