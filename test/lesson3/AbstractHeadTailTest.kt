@@ -135,8 +135,13 @@ abstract class AbstractHeadTailTest {
 
     protected fun doSubSetRelationTest() {
         val set: SortedSet<Int> = tree.subSet(2, 15)
+        tree.add(2)
+        assertTrue(set.contains(2))
+        assertFailsWith<IllegalArgumentException> { set.add(-1) }
         assertEquals(9, set.size)
         assertEquals(10, tree.size)
+        println(tree)
+        println(set)
         tree.add(11)
         assertTrue(set.contains(11))
         set.add(14)
@@ -145,10 +150,12 @@ abstract class AbstractHeadTailTest {
         assertFalse(set.contains(0))
         tree.add(15)
         assertFalse(set.contains(15))
+        set.add(13)
+        assertTrue(tree.contains(13))
         assertFailsWith<IllegalArgumentException> { set.add(1) }
         assertFailsWith<IllegalArgumentException> { set.add(20) }
-        assertEquals(11, set.size)
-        assertEquals(14, tree.size)
+        assertEquals(12, set.size)
+        assertEquals(15, tree.size)
     }
 
 }
