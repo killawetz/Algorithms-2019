@@ -2,6 +2,7 @@ package lesson6;
 
 import kotlin.NotImplementedError;
 
+import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -19,7 +20,38 @@ public class JavaDynamicTasks {
      * При сравнении подстрок, регистр символов *имеет* значение.
      */
     public static String longestCommonSubSequence(String first, String second) {
-        throw new NotImplementedError();
+        int firstLength = first.length();
+        int secondLength = second.length();
+        if(firstLength == 0 || secondLength == 0) return "";
+        int[][] LCS = new int[firstLength + 1][secondLength + 1];
+
+        for (int i = 0; i < firstLength; i++) {
+            for (int j = 0; j < secondLength; j++) {
+                if (first.charAt(i) == second.charAt(j)) {
+                    LCS[i+1][j+1] = LCS[i][j] + 1;
+                } else {
+                    LCS[i+1][j+1] = Math.max(LCS[i][j+1], LCS[i+1][j]);
+                }
+            }
+        }
+
+        StringBuffer result = new StringBuffer();
+        int bufI = firstLength;
+        int bufJ = secondLength;
+        while( bufI != 0 && bufJ != 0) {
+            if(LCS[bufI][bufJ] == LCS[bufI-1][bufJ]) {
+                bufI--;
+            }
+            else if(LCS[bufI][bufJ] == LCS[bufI][bufJ-1]) {
+                bufJ--;
+            }
+            else {
+                result.append(first.charAt(bufI - 1));
+                bufI--;
+                bufJ--;
+            }
+        }
+        return result.reverse().toString();
     }
 
     /**
