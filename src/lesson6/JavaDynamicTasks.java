@@ -2,7 +2,13 @@ package lesson6;
 
 import kotlin.NotImplementedError;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -53,6 +59,8 @@ public class JavaDynamicTasks {
         }
         return result.reverse().toString();
     }
+    //Time O(length(first) * length(second))
+    //Memory O(length(first) * length(second))
 
     /**
      * Наибольшая возрастающая подпоследовательность
@@ -67,7 +75,95 @@ public class JavaDynamicTasks {
      * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
      */
     public static List<Integer> longestIncreasingSubSequence(List<Integer> list) {
-        throw new NotImplementedError();
+        int n = list.size();
+
+        if(n == 1 || n == 0) {
+            return list;
+        }
+
+        int subSequenceLength = -1;
+
+        int[] subsequence = new int[n];
+        int[] indexes = new int[n];
+
+        for (int i = 0; i < list.size(); ++i) {
+            subsequence[i] = Integer.MAX_VALUE;
+        }
+
+        subsequence[0] = list.get(0);
+        indexes[0] = 0;
+
+        // алгоритм поиска подпоследовательности
+        // Time Complexity(n*logn)
+        // Memory O(n)
+        for (int i = 1; i < list.size(); ++i) {
+            indexes[i] = customBinarySearch(subsequence, 0, i, list.get(i));
+            if (subSequenceLength < indexes[i]) {
+                subSequenceLength = indexes[i];
+            }
+        }
+
+        //выбор подпоследовательности удовлетворяющей условию задачи
+        //Time complexity O(subSequenceLength * indexes.length)
+        //Memory O(list.size())
+        ArrayList<Integer> resultList = new ArrayList<>();
+        int currentInd = subSequenceLength;
+        int currentNum = 0;
+        int previousNum = Integer.MAX_VALUE;
+        for (int i = subSequenceLength; i >= 0; i--) {
+            for (int j = indexes.length - 1; j >= 0; j--) {
+                if (currentInd == indexes[j] && list.get(j) < previousNum) {
+                    currentNum = list.get(j);
+                }
+            }
+            previousNum = currentNum;
+            resultList.add(currentNum);
+            currentInd--;
+        }
+        Collections.reverse(resultList);
+        return (resultList);
+    }
+
+    static int customBinarySearch(int subsequence[],
+                                  int startLeft,
+                                  int startRight,
+                                  int key){
+
+        int mid = 0;
+        int left = startLeft;
+        int right = startRight;
+        int ceilIndex = 0;
+        boolean ceilIndexFound = false;
+
+        for (mid = (left + right) / 2; left <= right && !ceilIndexFound; mid = (left + right) / 2) {
+            if (subsequence[mid] > key) {
+                right = mid - 1;
+            }
+            else if (subsequence[mid] == key) {
+                ceilIndex = mid;
+                ceilIndexFound = true;
+            }
+            else if (mid + 1 <= right && subsequence[mid + 1] >= key) {
+                subsequence[mid + 1] = key;
+                ceilIndex = mid + 1;
+                ceilIndexFound = true;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        if (!ceilIndexFound) {
+            if (mid == left) {
+                subsequence[mid] = key;
+                ceilIndex = mid;
+            }
+            else {
+                subsequence[mid + 1] = key;
+                ceilIndex = mid + 1;
+            }
+        }
+
+        return ceilIndex;
     }
 
     /**
@@ -90,9 +186,41 @@ public class JavaDynamicTasks {
      *
      * Здесь ответ 2 + 3 + 4 + 1 + 2 = 12
      */
-    public static int shortestPathOnField(String inputName) {
-        throw new NotImplementedError();
+    public static int shortestPathOnField(String inputName) throws IOException {
+        FileReader reader = new FileReader(inputName);
+        BufferedReader scan = new BufferedReader(reader);
+        String keeper;
+        ArrayList<String> inputs = new ArrayList<>();
+        while ((keeper = scan.readLine()) != null) {
+           inputs.add(keeper);
+        }
+        int lines = inputs.size();
+        int columns = inputs.get(0).split(" ").length;
+        int[][] matrix = new int[lines][columns];
+        for (int i = 0; i < lines; i++) {
+            String[] bufferArray = inputs.get(i).split(" ");
+            for (int j = 0; j < bufferArray.length; j++) {
+            matrix[i][j] = Integer.parseInt(bufferArray[j]);
+            }
+        }
+
+        for(int i=0; i < lines; i++) {
+            for (int j = 0; j < columns; j++) {
+                if(i>0 && j>0){
+                    matrix[i][j]+=Math.min(Math.min(matrix[i-1][j], matrix[i][j-1]), matrix[i-1][j-1]);
+                }else{
+                    if(i>0){
+                        matrix[i][j]+=matrix[i-1][j];
+                    }else if(j>0){
+                        matrix[i][j]+=matrix[i][j-1];
+                    }
+                }
+            }
+        }
+        return matrix[lines-1][columns-1];
     }
+    //Time O(lines*columns)
+    //Memory O(lines*columns)
 
     // Задачу "Максимальное независимое множество вершин в графе без циклов"
     // смотрите в уроке 5
